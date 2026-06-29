@@ -1,0 +1,6 @@
+# robots.txt — KW New Projects Official Website
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://www.kwnewprojects.com/sitemap.xml

@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>KW New Projects — Content Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
+<link rel="stylesheet" href="style.css">
+<link rel="icon" href="images/favicon.svg" type="image/svg+xml">
+</head>
+<body class="admin-body">
+
+<!-- ===================== PASSWORD GATE ===================== -->
+<div class="gate" id="gate">
+  <form class="gate__card" id="gateForm" autocomplete="off">
+    <svg class="brand__mono" viewBox="0 0 64 64" role="img" aria-label="KW monogram"><rect x="2" y="2" width="60" height="60" rx="14" fill="#10233f"/><rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="#c9925e" stroke-width="1.5"/><text x="32" y="42" text-anchor="middle" font-family="Fraunces, serif" font-size="30" font-weight="600" fill="#f6f3ee">KW</text></svg>
+    <h1>KW New Projects Admin</h1>
+    <p>Restricted content panel. Please enter your access password to continue.</p>
+    <div class="field" style="text-align:left">
+      <label for="pw">Password</label>
+      <input id="pw" type="password" autocomplete="current-password" placeholder="Enter password" required>
+    </div>
+    <button class="btn btn--primary btn--block" type="submit"><i class="fa-solid fa-lock-open"></i> Unlock Dashboard</button>
+    <div class="gate__err" id="gateErr" role="alert"></div>
+  </form>
+</div>
+
+<!-- ===================== ADMIN SHELL ===================== -->
+<div class="admin-shell" id="shell">
+  <div class="admin-top">
+    <div class="container">
+      <div class="brand">
+        <svg class="brand__mono" viewBox="0 0 64 64" role="img" aria-label="KW monogram"><rect x="2" y="2" width="60" height="60" rx="14" fill="#10233f"/><rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="#c9925e" stroke-width="1.5"/><text x="32" y="42" text-anchor="middle" font-family="Fraunces, serif" font-size="30" font-weight="600" fill="#f6f3ee">KW</text></svg>
+        <span class="brand__name">KW New Projects<small>Content Admin</small></span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <a class="btn btn--ghost btn--sm" href="index.html" target="_blank" rel="noopener" style="color:#fff;border-color:rgba(255,255,255,.25)"><i class="fa-solid fa-up-right-from-square"></i> View Site</a>
+        <button class="btn btn--copper btn--sm" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="stat-row">
+      <div class="mini-stat"><b id="statBlogs">0</b><span>Published Blog Posts</span></div>
+      <div class="mini-stat"><b id="statLeads">0</b><span>Total Lead Enquiries</span></div>
+      <div class="mini-stat"><b id="statVisits">0</b><span>Site Visit Requests</span></div>
+      <div class="mini-stat"><b id="statToday">0</b><span>Leads Today</span></div>
+    </div>
+
+    <div class="admin-tabs">
+      <button class="admin-tab is-active" data-view="blogs"><i class="fa-solid fa-newspaper"></i> Blog Manager</button>
+      <button class="admin-tab" data-view="leads"><i class="fa-solid fa-users"></i> Lead Enquiries</button>
+    </div>
+
+    <!-- ===== Blog view ===== -->
+    <section class="admin-view is-active" data-view="blogs">
+      <div class="admin-grid">
+        <!-- form -->
+        <form class="panel admin-form" id="blogForm">
+          <h3 id="blogFormTitle">Add New Blog Post</h3>
+          <input type="hidden" id="blogId">
+          <div class="field"><label for="bTitle">Title</label><input id="bTitle" type="text" required placeholder="e.g. KW New Projects Possession Date Update"></div>
+          <div class="field"><label for="bCat">Category</label>
+            <select id="bCat" required>
+              <option value="">Select category</option>
+              <option>Updates</option><option>Location</option><option>Amenities</option>
+              <option>Floor Plan</option><option>Pricing</option><option>Guide</option><option>RERA</option>
+            </select>
+          </div>
+          <div class="field"><label for="bMeta">Meta Description</label><textarea id="bMeta" maxlength="180" placeholder="Short SEO description (max 180 chars)"></textarea></div>
+          <div class="field"><label for="bImg">Featured Image URL</label><input id="bImg" type="url" placeholder="https://… or images/your-image.jpg"></div>
+          <div class="field"><label for="bSlug">Slug (auto)</label><input id="bSlug" type="text" placeholder="auto-generated-from-title"><div class="slug-preview" id="slugPreview">/blog/…</div></div>
+          <div class="field"><label for="bBody">Body</label><textarea id="bBody" rows="8" required placeholder="Write the full post. Separate paragraphs with a blank line."></textarea></div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn--copper" type="submit" id="blogSubmitBtn"><i class="fa-solid fa-floppy-disk"></i> Save Post</button>
+            <button class="btn btn--ghost" type="button" id="blogResetBtn">Clear</button>
+          </div>
+        </form>
+
+        <!-- list -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3 style="margin:0">Published Posts</h3>
+            <span class="tag" id="blogCount">0 posts</span>
+          </div>
+          <div class="table-scroll">
+            <table class="data-table">
+              <thead><tr><th>Title</th><th>Category</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="blogTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Leads view ===== -->
+    <section class="admin-view" data-view="leads">
+      <div class="panel">
+        <div class="panel-head">
+          <h3 style="margin:0">Lead Enquiries</h3>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn--ghost btn--sm" id="clearLeadsBtn"><i class="fa-solid fa-trash"></i> Clear All</button>
+            <button class="btn btn--copper btn--sm" id="exportBtn"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+          </div>
+        </div>
+        <div class="table-scroll">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Phone</th><th>Email</th><th>Configuration</th><th>Visit Date</th><th>Source</th><th>Date</th><th></th></tr></thead>
+            <tbody id="leadTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ===== Shared keys (must match script.js) ===== */
+  var BLOG_KEY = "kwnp_blogs";
+  var LEAD_KEY = "kwnp_leads";
+  var AUTH_KEY = "kwnp_admin_ok";
+
+  /* SHA-256 hash of the access password (password is NOT stored in plaintext).
+     To set a new password, compute its SHA-256 hex and replace the value below. */
+  var PW_HASH = "15c2cb7e119d9e133d9aca038223904dee438f253138487c00a475d23392612f";
+
+  /* ===== helpers ===== */
+  function readJSON(k, f) { try { var v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : f; } catch (e) { return f; } }
+  function writeJSON(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function nowISO() { return new Date().toISOString(); }
+  function uid() { return "id-" + Date.now().toString(36) + "-" + Math.floor(Math.random() * 1e6).toString(36); }
+  function fmtDate(iso) { try { return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return iso; } }
+  function isSafeUrl(u) { return typeof u === "string" && /^https?:\/\//i.test(u.trim()); }
+  function slugify(s) { return String(s).toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, ""); }
+
+  async function sha256Hex(str) {
+    var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+    return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg; t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2600);
+  }
+
+  /* ===== Auth gate ===== */
+  var gate = document.getElementById("gate");
+  var shell = document.getElementById("shell");
+
+  function showShell() {
+    gate.style.display = "none";
+    shell.classList.add("is-on");
+    initDashboard();
+  }
+
+  if (sessionStorage.getItem(AUTH_KEY) === "1") showShell();
+
+  document.getElementById("gateForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    var err = document.getElementById("gateErr");
+    var pw = document.getElementById("pw").value;
+    err.textContent = "";
+    try {
+      var hex = await sha256Hex(pw);
+      if (hex === PW_HASH) {
+        sessionStorage.setItem(AUTH_KEY, "1");
+        showShell();
+      } else {
+        err.textContent = "Incorrect password. Please try again.";
+        document.getElementById("pw").value = "";
+      }
+    } catch (e2) {
+      err.textContent = "Secure crypto unavailable in this browser context.";
+    }
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    sessionStorage.removeItem(AUTH_KEY);
+    location.reload();
+  });
+
+  /* ===== Dashboard ===== */
+  function initDashboard() {
+    /* tab switching */
+    document.querySelectorAll(".admin-tab").forEach(function (tab) {
+      tab.addEventListener("click", function () {
+        var v = tab.getAttribute("data-view");
+        document.querySelectorAll(".admin-tab").forEach(function (t) { t.classList.toggle("is-active", t === tab); });
+        document.querySelectorAll(".admin-view").forEach(function (s) { s.classList.toggle("is-active", s.getAttribute("data-view") === v); });
+      });
+    });
+
+    /* ---- Blog form ---- */
+    var blogForm = document.getElementById("blogForm");
+    var fId = document.getElementById("blogId");
+    var fTitle = document.getElementById("bTitle");
+    var fCat = document.getElementById("bCat");
+    var fMeta = document.getElementById("bMeta");
+    var fImg = document.getElementById("bImg");
+    var fSlug = document.getElementById("bSlug");
+    var fBody = document.getElementById("bBody");
+    var slugPreview = document.getElementById("slugPreview");
+    var slugEdited = false;
+
+    fSlug.addEventListener("input", function () { slugEdited = true; slugPreview.textContent = "/blog/" + (slugify(fSlug.value) || "…"); });
+    fTitle.addEventListener("input", function () {
+      if (!slugEdited) { fSlug.value = slugify(fTitle.value); slugPreview.textContent = "/blog/" + (fSlug.value || "…"); }
+    });
+
+    function resetBlogForm() {
+      blogForm.reset(); fId.value = ""; slugEdited = false; slugPreview.textContent = "/blog/…";
+      document.getElementById("blogFormTitle").textContent = "Add New Blog Post";
+      document.getElementById("blogSubmitBtn").innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save Post';
+    }
+    document.getElementById("blogResetBtn").addEventListener("click", resetBlogForm);
+
+    blogForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (!blogForm.checkValidity()) { blogForm.reportValidity(); return; }
+      var img = fImg.value.trim();
+      if (img && !isSafeUrl(img) && !/^images\//.test(img)) { toast("Image URL must start with http(s):// or images/"); return; }
+      var blogs = readJSON(BLOG_KEY, []);
+      var slug = slugify(fSlug.value || fTitle.value);
+      var record = {
+        id: fId.value || uid(),
+        title: fTitle.value.trim(),
+        category: fCat.value,
+        meta: fMeta.value.trim(),
+        image: img,
+        slug: slug,
+        body: fBody.value.trim(),
+        date: nowISO()
+      };
+      if (fId.value) {
+        var i = blogs.findIndex(function (b) { return b.id === fId.value; });
+        if (i > -1) { record.date = blogs[i].date; blogs[i] = record; }
+        toast("Post updated");
+      } else {
+        blogs.push(record);
+        toast("Post published — live on the site");
+      }
+      writeJSON(BLOG_KEY, blogs);
+      resetBlogForm();
+      renderBlogs();
+      renderStats();
+    });
+
+    function editBlog(id) {
+      var b = readJSON(BLOG_KEY, []).find(function (x) { return x.id === id; });
+      if (!b) return;
+      fId.value = b.id; fTitle.value = b.title; fCat.value = b.category; fMeta.value = b.meta || "";
+      fImg.value = b.image || ""; fSlug.value = b.slug || ""; fBody.value = b.body || "";
+      slugEdited = true; slugPreview.textContent = "/blog/" + (b.slug || "…");
+      document.getElementById("blogFormTitle").textContent = "Edit Blog Post";
+      document.getElementById("blogSubmitBtn").innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Post';
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    function deleteBlog(id) {
+      if (!confirm("Delete this blog post? This cannot be undone.")) return;
+      writeJSON(BLOG_KEY, readJSON(BLOG_KEY, []).filter(function (b) { return b.id !== id; }));
+      renderBlogs(); renderStats(); toast("Post deleted");
+    }
+
+    function renderBlogs() {
+      var body = document.getElementById("blogTableBody");
+      var blogs = readJSON(BLOG_KEY, []).slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+      body.textContent = "";
+      document.getElementById("blogCount").textContent = blogs.length + (blogs.length === 1 ? " post" : " posts");
+      if (!blogs.length) {
+        var tr = document.createElement("tr");
+        var td = document.createElement("td"); td.colSpan = 4; td.style.color = "#6c7686"; td.textContent = "No posts yet. Add your first post.";
+        tr.appendChild(td); body.appendChild(tr); return;
+      }
+      blogs.forEach(function (b) {
+        var tr = document.createElement("tr");
+        var tdTitle = document.createElement("td"); tdTitle.textContent = b.title; tdTitle.style.fontWeight = "600";
+        var tdCat = document.createElement("td"); var tag = document.createElement("span"); tag.className = "tag"; tag.textContent = b.category || "—"; tdCat.appendChild(tag);
+        var tdDate = document.createElement("td"); tdDate.textContent = fmtDate(b.date);
+        var tdAct = document.createElement("td");
+        var wrap = document.createElement("div"); wrap.className = "row-actions";
+        var ed = document.createElement("button"); ed.className = "icon-btn"; ed.title = "Edit"; ed.innerHTML = '<i class="fa-solid fa-pen"></i>'; ed.addEventListener("click", function () { editBlog(b.id); });
+        var del = document.createElement("button"); del.className = "icon-btn danger"; del.title = "Delete"; del.innerHTML = '<i class="fa-solid fa-trash"></i>'; del.addEventListener("click", function () { deleteBlog(b.id); });
+        wrap.appendChild(ed); wrap.appendChild(del); tdAct.appendChild(wrap);
+        tr.appendChild(tdTitle); tr.appendChild(tdCat); tr.appendChild(tdDate); tr.appendChild(tdAct);
+        body.appendChild(tr);
+      });
+    }
+
+    /* ---- Leads ---- */
+    function renderLeads() {
+      var body = document.getElementById("leadTableBody");
+      var leads = readJSON(LEAD_KEY, []).slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+      body.textContent = "";
+      if (!leads.length) {
+        var tr = document.createElement("tr");
+        var td = document.createElement("td"); td.colSpan = 8; td.style.color = "#6c7686"; td.textContent = "No enquiries captured yet.";
+        tr.appendChild(td); body.appendChild(tr); return;
+      }
+      leads.forEach(function (l) {
+        var tr = document.createElement("tr");
+        [l.name, l.phone, l.email, l.config, l.visitDate, l.source, fmtDate(l.date)].forEach(function (val) {
+          var td = document.createElement("td"); td.textContent = val || "—"; tr.appendChild(td);
+        });
+        var tdAct = document.createElement("td");
+        var del = document.createElement("button"); del.className = "icon-btn danger"; del.title = "Delete"; del.innerHTML = '<i class="fa-solid fa-trash"></i>';
+        del.addEventListener("click", function () {
+          if (!confirm("Delete this lead?")) return;
+          writeJSON(LEAD_KEY, readJSON(LEAD_KEY, []).filter(function (x) { return x.id !== l.id; }));
+          renderLeads(); renderStats(); toast("Lead deleted");
+        });
+        tdAct.appendChild(del); tr.appendChild(tdAct);
+        body.appendChild(tr);
+      });
+    }
+
+    function csvCell(v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }
+    document.getElementById("exportBtn").addEventListener("click", function () {
+      var leads = readJSON(LEAD_KEY, []);
+      if (!leads.length) { toast("No leads to export"); return; }
+      var headers = ["Name", "Phone", "Email", "Configuration", "Visit Date", "Source", "Date"];
+      var rows = leads.map(function (l) { return [l.name, l.phone, l.email, l.config, l.visitDate, l.source, fmtDate(l.date)].map(csvCell).join(","); });
+      var csv = headers.map(csvCell).join(",") + "\n" + rows.join("\n");
+      var blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a"); a.href = url; a.download = "kw-new-projects-leads.csv";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      toast("CSV exported");
+    });
+
+    document.getElementById("clearLeadsBtn").addEventListener("click", function () {
+      if (!confirm("Clear ALL leads? This cannot be undone.")) return;
+      writeJSON(LEAD_KEY, []); renderLeads(); renderStats(); toast("All leads cleared");
+    });
+
+    /* ---- Stats ---- */
+    function renderStats() {
+      var blogs = readJSON(BLOG_KEY, []);
+      var leads = readJSON(LEAD_KEY, []);
+      document.getElementById("statBlogs").textContent = blogs.length;
+      document.getElementById("statLeads").textContent = leads.length;
+      document.getElementById("statVisits").textContent = leads.filter(function (l) { return l.visitDate && l.visitDate !== "—"; }).length;
+      var today = new Date().toDateString();
+      document.getElementById("statToday").textContent = leads.filter(function (l) { try { return new Date(l.date).toDateString() === today; } catch (e) { return false; } }).length;
+    }
+
+    /* live sync from public tab */
+    window.addEventListener("storage", function (e) {
+      if (e.key === LEAD_KEY) { renderLeads(); renderStats(); }
+      if (e.key === BLOG_KEY) { renderBlogs(); renderStats(); }
+    });
+
+    renderBlogs();
+    renderLeads();
+    renderStats();
+  }
+})();
+</script>
+</body>
+</html>
