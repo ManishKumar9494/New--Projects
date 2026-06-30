@@ -550,9 +550,11 @@ h1, h2, h3, h4 { font-family: var(--serif-2); color: var(--espresso); font-weigh
   .car__btn { width: 44px; height: 44px; }
 }
 @media (max-width: 600px) {
-  .section { padding: 64px 0; }
+  .section { padding: 52px 0; }
   .container { padding-inline: 18px; }
-  .hero { padding: 40px 0 56px; }
+  .hero { padding: 24px 0 28px; }
+  .hero__grid { gap: 16px; }
+  .hero__media { margin-top: 16px; }
   .hero__ctas { flex-direction: column; }
   .hero__ctas .btn { width: 100%; }
   .hero h1 { font-size: clamp(2rem, 8vw, 2.7rem); }
