@@ -255,6 +255,54 @@
     if (e.key === "Escape") closeAllModals();
   });
 
+  /* =======================================================================
+     CRATIO CRM — Web-to-Lead integration
+     -----------------------------------------------------------------------
+     Leads are pushed to Cratio CRM on submit (and also kept in localStorage
+     as a safety backup so nothing is ever lost if the network fails).
+
+     TO ACTIVATE:
+       1) In Cratio: Settings → Web Forms → create/open your web form.
+       2) Copy the form's POST URL into CRM.endpoint below.
+       3) Map our keys to YOUR Cratio field names in CRM.fieldMap.
+       4) Add any hidden fields Cratio requires (webform id, account id) to
+          CRM.hidden.
+       5) Set CRM.enabled = true.
+     (Cross-origin CRM endpoints rarely send CORS headers, so we post with
+      mode:"no-cors" + keepalive — fire-and-forget, reliable delivery.)
+     ======================================================================= */
+  var CRM = {
+    enabled: false,                 // <-- set true after filling endpoint + fieldMap
+    endpoint: "",                   // <-- paste your Cratio web-form POST URL
+    fieldMap: {                     // our key : Cratio field name
+      name: "name",
+      phone: "mobile",
+      email: "email",
+      config: "configuration",
+      visitDate: "visit_date",
+      source: "lead_source"
+    },
+    hidden: {}                      // e.g. { webformid: "123", accountid: "456" }
+  };
+  function sendToCRM(lead) {
+    if (!CRM.enabled || !CRM.endpoint) return;
+    try {
+      var body = new URLSearchParams();
+      Object.keys(CRM.fieldMap).forEach(function (k) {
+        var v = lead[k];
+        if (v != null && v !== "" && v !== "—") body.append(CRM.fieldMap[k], v);
+      });
+      Object.keys(CRM.hidden).forEach(function (k) { body.append(k, CRM.hidden[k]); });
+      fetch(CRM.endpoint, {
+        method: "POST",
+        mode: "no-cors",
+        keepalive: true,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: body.toString()
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
   /* ---------- Lead capture ---------- */
   function saveLead(data) {
     var leads = readJSON(LEAD_KEY, []);
@@ -280,6 +328,7 @@
         date: nowISO()
       };
       saveLead(lead);
+      sendToCRM(lead);
       if (window.dataLayer) window.dataLayer.push({ event: "generate_lead", lead_source: lead.source });
       if (typeof gtag === "function") { try { gtag("event", "generate_lead", { source: lead.source }); } catch (err) {} }
 
