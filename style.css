@@ -668,3 +668,65 @@ body { -webkit-overflow-scrolling: touch; }
   .container { padding-inline: 14px; }
   .brand__name { font-size: 1.05rem; }
 }
+
+/* =========================================================================
+   Luxury finish — refined gold accents, sheen & glow (additive, layout-safe)
+   ========================================================================= */
+html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility; }
+::selection { background: rgba(198,161,90,.28); color: var(--espresso); }
+
+/* Warm ambient tint on the light background */
+body {
+  background:
+    radial-gradient(1100px 560px at 100% -4%, rgba(198,161,90,.07), transparent 58%),
+    radial-gradient(900px 520px at -8% 102%, rgba(124,51,64,.045), transparent 60%),
+    var(--cream);
+  background-attachment: fixed;
+}
+
+/* Champagne sheen sweeping across gold buttons on hover */
+.btn--gold, .btn--copper { position: relative; overflow: hidden; }
+.btn--gold::after, .btn--copper::after {
+  content: ""; position: absolute; top: 0; left: -130%; width: 55%; height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: skewX(-18deg); transition: left .6s var(--ease); pointer-events: none;
+}
+.btn--gold:hover::after, .btn--copper:hover::after { left: 140%; }
+
+/* Soft gold glow within dark sections (behind content, via background layer) */
+.section--ink, .section--dark {
+  background-image: radial-gradient(760px 400px at 84% 0%, rgba(198,161,90,.12), transparent 60%);
+  background-color: var(--espresso);
+}
+
+/* Elegant gold flourish beneath centered section headings */
+.section-head.center .display::after,
+.section-head.center .be-heading::after {
+  content: ""; display: block; width: 66px; height: 2px; margin: 20px auto 0;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+/* Refined card interactions — gentle gold ring + deeper, warmer lift */
+.usp:hover, .life-card:hover, .rera-card:hover, .post-card:hover {
+  border-color: var(--line-gold);
+  box-shadow: 0 18px 42px rgba(124,51,64,.10);
+}
+
+/* Wine-to-rose gradient emphasis on the hero name */
+.hero h1 em {
+  background: linear-gradient(95deg, var(--maroon), var(--maroon-soft));
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Hairline gold accent under the sticky nav */
+.nav { box-shadow: 0 1px 0 rgba(198,161,90,.20); }
+.nav.is-stuck { box-shadow: 0 6px 26px rgba(22,16,12,.30), 0 1px 0 rgba(198,161,90,.25); }
+
+/* Luxe gold scrollbar */
+* { scrollbar-width: thin; scrollbar-color: var(--gold) var(--cream-2); }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--cream-2); }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, var(--gold), var(--maroon)); border-radius: 8px; border: 2px solid var(--cream-2); }
+
+@media (max-width: 600px) { body { background-attachment: scroll; } }
