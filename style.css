@@ -637,3 +637,13 @@ body { -webkit-overflow-scrolling: touch; }
   .facts-table th, .facts-table td { padding: 12px 14px; font-size: .9rem; }
   .map-wrap, .map-wrap iframe { min-height: 300px; }
 }
+
+/* Prevent content from being clipped on small screens:
+   grid/flex children must be allowed to shrink, and long button
+   labels must wrap instead of forcing the layout wider than the viewport. */
+.hero__grid > *, .overview__grid > *, .pricing > *, .band > *, .loc-grid > *, .footer__grid > * { min-width: 0; }
+.btn { max-width: 100%; }
+@media (max-width: 860px) {
+  .btn { white-space: normal; }
+  .hero__ctas .btn { width: 100%; }
+}
