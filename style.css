@@ -6,27 +6,27 @@
    ========================================================================= */
 
 :root {
-  --espresso: #16100c;
-  --espresso-2: #20171010;
-  --night: #1b130d;
-  --night-2: #271c14;
-  --maroon: #6e1023;
-  --maroon-2: #520b1a;
-  --maroon-soft: #8a2233;
-  --gold: #c9a24b;
-  --gold-2: #e3c77e;
-  --gold-soft: #efe2c2;
-  --cream: #f6f1e8;
-  --cream-2: #efe7d6;
-  --paper: #fbf8f2;
+  --espresso: #2a2520;
+  --espresso-2: #2a252010;
+  --night: #221d18;
+  --night-2: #3a3128;
+  --maroon: #7c3340;
+  --maroon-2: #5f2531;
+  --maroon-soft: #9a4453;
+  --gold: #c6a15a;
+  --gold-2: #e3ca8c;
+  --gold-soft: #f1e5ca;
+  --cream: #f7f3ea;
+  --cream-2: #efe8da;
+  --paper: #fcfaf4;
   --white: #ffffff;
-  --text: #2c241d;
-  --muted: #756859;
-  --text-light: #e9ddca;
-  --muted-light: #b6a486;
-  --line: #e4dccb;
-  --line-2: #d8ccb4;
-  --line-gold: rgba(201, 162, 75, .38);
+  --text: #2f2822;
+  --muted: #7a6e60;
+  --text-light: #ece2d2;
+  --muted-light: #bcab92;
+  --line: #e7dece;
+  --line-2: #dacdb6;
+  --line-gold: rgba(198, 161, 90, .40);
   --ok: #3f7d4f;
   --shadow-sm: 0 1px 2px rgba(22, 16, 12, .05), 0 8px 24px rgba(22, 16, 12, .08);
   --shadow-md: 0 16px 40px rgba(22, 16, 12, .14);
@@ -576,7 +576,7 @@ h1, h2, h3, h4 { font-family: var(--serif-2); color: var(--espresso); font-weigh
    Compatibility layer — maps the markup's class names onto the premium
    espresso / burgundy / gold palette so index.html renders cohesively.
    ========================================================================= */
-:root { --copper: #c9a24b; --copper-2: #e3c77e; }
+:root { --copper: #c6a15a; --copper-2: #e3ca8c; }
 
 /* Buttons referenced in markup */
 .btn--copper { background: linear-gradient(120deg, var(--gold), var(--gold-2)); color: #2a1c08; box-shadow: 0 10px 26px rgba(201,162,75,.32); }
