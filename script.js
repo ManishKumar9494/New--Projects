@@ -42,7 +42,7 @@
         id: uid(), title: "KW New Projects Location: Why Ghaziabad Is the Smart Choice",
         slug: "kw-new-projects-location-ghaziabad", category: "Location",
         meta: "Explore the KW New Projects Location advantage — metro, expressway and social-infra connectivity to Delhi & Noida.",
-        image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1000&q=80",
+        image: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1000&q=80",
         body: "KW New Projects enjoys a prime Ghaziabad address that balances connectivity with calm.\n\nWith quick access to the metro network and major expressways, commuting to Delhi and Noida is effortless. Reputed schools, hospitals, malls and workspaces lie within a short drive, making everyday life convenient for families.\n\nFor home-buyers evaluating the KW New Projects Location, the combination of low-density planning and strong civic infrastructure makes it a compelling long-term investment.",
         date: nowISO()
       },
@@ -50,7 +50,7 @@
         id: uid(), title: "KW New Projects Amenities: Resort-Grade Living Explained",
         slug: "kw-new-projects-amenities-guide", category: "Amenities",
         meta: "A complete guide to KW New Projects Amenities — clubhouse, infinity pool, gym, sky deck and smart-home features.",
-        image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=1000&q=80",
+        image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80",
         body: "Luxury is in the details, and KW New Projects Amenities are designed to elevate everyday living.\n\nResidents enjoy a grand clubhouse, infinity-edge pool, fully-equipped gymnasium, spa, landscaped greens and a sky deck lounge with panoramic views.\n\nFamilies benefit from dedicated kids play zones, sports courts and jogging tracks, while smart-home automation and 24x7 security deliver peace of mind across both towers.",
         date: nowISO()
       },
