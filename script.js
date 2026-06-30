@@ -180,6 +180,22 @@
     openModal("readerModal");
   }
 
+  /* ---------- Scroll lock (robust — never traps the page) ---------- */
+  function lockScroll() {
+    document.documentElement.classList.add("no-scroll");
+    document.body.classList.add("no-scroll");
+  }
+  function maybeUnlock() {
+    var anyModalOpen = document.querySelector(".modal.is-open");
+    var dr = document.getElementById("drawer");
+    var drawerOpen = dr && dr.classList.contains("is-open");
+    if (!anyModalOpen && !drawerOpen) {
+      document.documentElement.classList.remove("no-scroll");
+      document.body.classList.remove("no-scroll");
+      document.body.style.overflow = ""; // clear any legacy inline lock
+    }
+  }
+
   /* ---------- Modals ---------- */
   var lastFocus = null;
   function openModal(id) {
@@ -188,14 +204,14 @@
     lastFocus = document.activeElement;
     m.classList.add("is-open");
     m.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
+    lockScroll();
     var focusable = m.querySelector("input, select, textarea, button");
     if (focusable) setTimeout(function () { focusable.focus(); }, 60);
   }
   function closeModal(m) {
     m.classList.remove("is-open");
     m.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+    maybeUnlock();
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   function closeAllModals() {
@@ -266,13 +282,13 @@
     navToggle.addEventListener("click", function () {
       drawer.classList.add("is-open");
       navToggle.setAttribute("aria-expanded", "true");
-      document.body.style.overflow = "hidden";
+      lockScroll();
     });
     drawer.addEventListener("click", function (e) {
       if (e.target.closest("[data-drawer-close]")) {
         drawer.classList.remove("is-open");
         navToggle.setAttribute("aria-expanded", "false");
-        document.body.style.overflow = "";
+        maybeUnlock();
       }
     });
   }
@@ -342,11 +358,22 @@
       markShown();
       openModal("offerModal");
     }
-    var timer = setTimeout(trigger, 18000); // timed
-    document.addEventListener("mouseout", function (e) {        // exit-intent (desktop)
-      if (!e.relatedTarget && e.clientY <= 0) { clearTimeout(timer); trigger(); }
-    });
+    // Desktop only — avoids trapping mobile scroll and intrusive-interstitial SEO penalties
+    var isDesktop = window.matchMedia("(min-width: 769px)").matches;
+    if (isDesktop) {
+      var timer = setTimeout(trigger, 18000); // timed
+      document.addEventListener("mouseout", function (e) {        // exit-intent
+        if (!e.relatedTarget && e.clientY <= 0) { clearTimeout(timer); trigger(); }
+      });
+    }
   })();
+
+  /* ---------- Safety: never leave the page scroll-locked (bfcache / legacy state) ---------- */
+  window.addEventListener("pageshow", function () {
+    document.documentElement.classList.remove("no-scroll");
+    document.body.classList.remove("no-scroll");
+    document.body.style.overflow = "";
+  });
 
   /* ---------- Cross-tab / same-browser live sync ---------- */
   window.addEventListener("storage", function (e) {

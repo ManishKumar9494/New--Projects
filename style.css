@@ -619,3 +619,21 @@ h1, h2, h3, h4 { font-family: var(--serif-2); color: var(--espresso); font-weigh
   .amenities-grid { grid-template-columns: repeat(2, 1fr); }
   .overview__grid { gap: 30px; }
 }
+
+/* =========================================================================
+   Mobile-friendliness hardening — prevent scroll-lock traps & overflow
+   ========================================================================= */
+html { overflow-x: hidden; }
+body { -webkit-overflow-scrolling: touch; }
+/* Scroll lock used by modals/drawer — released as soon as they close */
+.no-scroll { overflow: hidden !important; }
+.modal__card { overscroll-behavior: contain; }
+/* Long unbreakable strings (URLs, emails) must not force horizontal scroll */
+.facts-table td, .faq-a__inner, .reader__body, .footer__contact li, .ticker__contact a { overflow-wrap: anywhere; }
+
+@media (max-width: 600px) {
+  .floaters { right: 12px; bottom: 12px; gap: 10px; }
+  .floaters a, .floaters button { width: 50px; height: 50px; font-size: 1.2rem; }
+  .facts-table th, .facts-table td { padding: 12px 14px; font-size: .9rem; }
+  .map-wrap, .map-wrap iframe { min-height: 300px; }
+}
