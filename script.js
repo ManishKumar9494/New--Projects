@@ -42,7 +42,7 @@
         id: uid(), title: "KW New Projects Location: Why Ghaziabad Is the Smart Choice",
         slug: "kw-new-projects-location-ghaziabad", category: "Location",
         meta: "Explore the KW New Projects Location advantage — metro, expressway and social-infra connectivity to Delhi & Noida.",
-        image: "images/blog-location.jpg",
+        image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?auto=format&fit=crop&w=1000&q=80",
         body: "KW New Projects enjoys a prime Ghaziabad address that balances connectivity with calm.\n\nWith quick access to the metro network and major expressways, commuting to Delhi and Noida is effortless. Reputed schools, hospitals, malls and workspaces lie within a short drive, making everyday life convenient for families.\n\nFor home-buyers evaluating the KW New Projects Location, the combination of low-density planning and strong civic infrastructure makes it a compelling long-term investment.",
         date: nowISO()
       },
@@ -50,7 +50,7 @@
         id: uid(), title: "KW New Projects Amenities: Resort-Grade Living Explained",
         slug: "kw-new-projects-amenities-guide", category: "Amenities",
         meta: "A complete guide to KW New Projects Amenities — clubhouse, infinity pool, gym, sky deck and smart-home features.",
-        image: "images/blog-amenities.jpg",
+        image: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?auto=format&fit=crop&w=1000&q=80",
         body: "Luxury is in the details, and KW New Projects Amenities are designed to elevate everyday living.\n\nResidents enjoy a grand clubhouse, infinity-edge pool, fully-equipped gymnasium, spa, landscaped greens and a sky deck lounge with panoramic views.\n\nFamilies benefit from dedicated kids play zones, sports courts and jogging tracks, while smart-home automation and 24x7 security deliver peace of mind across both towers.",
         date: nowISO()
       },
@@ -58,7 +58,7 @@
         id: uid(), title: "KW New Projects RERA & Construction Status: What Buyers Should Know",
         slug: "kw-new-projects-rera-construction-status", category: "Updates",
         meta: "Understand KW New Projects RERA Status, Construction Status and Possession Date — and how to verify them on up-rera.in.",
-        image: "images/blog-rera.jpg",
+        image: "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?auto=format&fit=crop&w=1000&q=80",
         body: "Transparency matters when buying a pre-launch home. The KW New Projects RERA Number and RERA Status are currently To be updated and should always be verified on the official portal at up-rera.in.\n\nAs the project progresses, Construction Status and Project Status updates will be shared on the official website.\n\nWe recommend every buyer confirm regulated details — prices, sizes, RERA registration and possession date — independently before booking.",
         date: nowISO()
       }

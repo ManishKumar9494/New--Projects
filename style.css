@@ -572,3 +572,50 @@ h1, h2, h3, h4 { font-family: var(--serif-2); color: var(--espresso); font-weigh
   .reveal { opacity: 1; transform: none; }
   .car__track { transition: none; }
 }
+
+/* =========================================================================
+   Compatibility layer — maps the markup's class names onto the premium
+   espresso / burgundy / gold palette so index.html renders cohesively.
+   ========================================================================= */
+:root { --copper: #c9a24b; --copper-2: #e3c77e; }
+
+/* Buttons referenced in markup */
+.btn--copper { background: linear-gradient(120deg, var(--gold), var(--gold-2)); color: #2a1c08; box-shadow: 0 10px 26px rgba(201,162,75,.32); }
+.btn--copper:hover { box-shadow: 0 16px 34px rgba(201,162,75,.44); }
+.btn--primary { background: var(--espresso); color: #f3e9da; box-shadow: var(--shadow-sm); }
+.btn--primary:hover { background: var(--night-2); }
+
+/* Section tints referenced in markup */
+.section--tint { background: var(--paper); }
+.section--ink { background: var(--espresso); color: var(--text-light); }
+.section--ink h1, .section--ink h2, .section--ink h3, .section--ink h4 { color: #fff; }
+.section--ink .lede { color: var(--muted-light); }
+.section--ink .checklist li { color: #d8ccb6; border-color: rgba(201,162,75,.14); }
+.section--ink .checklist li i { color: var(--gold-2); }
+.section--ink .eyebrow { color: var(--gold-2); }
+.section--ink .eyebrow::before, .section--ink .eyebrow::after { background: var(--gold-2); }
+
+/* Display heading (h2.display) */
+.display { font-family: var(--serif); font-weight: 500; font-size: clamp(2rem, 4.4vw, 3.1rem); line-height: 1.1; letter-spacing: .01em; margin-top: 4px; }
+
+/* Overview grid (double-underscore names in markup) */
+.overview__grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+.overview__media { position: relative; }
+.overview__media img { width: 100%; aspect-ratio: 3/4; object-fit: cover; box-shadow: var(--shadow-md); }
+
+/* Amenities grid (light cards) */
+.amenities-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+.amenities-grid .amenity { background: #fff; border: 1px solid var(--line); padding: 28px 16px; text-align: center; box-shadow: var(--shadow-sm); height: auto; transition: transform .3s var(--ease), box-shadow .3s, border-color .3s; }
+.amenities-grid .amenity:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--line-gold); background: #fff; }
+.amenities-grid .amenity i { font-size: 1.8rem; color: var(--maroon); }
+.amenities-grid .amenity span { display: block; margin-top: 12px; font-family: var(--serif-2); font-size: .94rem; color: var(--espresso); letter-spacing: .02em; }
+
+@media (max-width: 1080px) {
+  .overview__grid { grid-template-columns: 1fr; }
+  .amenities-grid { grid-template-columns: repeat(4, 1fr); }
+}
+@media (max-width: 860px) { .amenities-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px) {
+  .amenities-grid { grid-template-columns: repeat(2, 1fr); }
+  .overview__grid { gap: 30px; }
+}
