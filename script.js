@@ -34,6 +34,33 @@
     return /^https?:\/\//i.test(url.trim());
   }
 
+  /* ---------- Phone validation ----------
+     Rules: exactly 10 digits, starts 6-9, not a sequential run,
+     and no single digit repeated more than 7 times.
+     Returns "" when valid, or an error message when invalid. */
+  function phoneError(raw) {
+    var d = (raw || "").replace(/\D/g, "");
+    if (d.length === 12 && d.indexOf("91") === 0) d = d.slice(2); // strip +91
+    if (d.length === 11 && d.charAt(0) === "0") d = d.slice(1);   // strip leading 0
+    if (d.length !== 10) return "Please enter a valid 10-digit mobile number.";
+    if (!/^[6-9]/.test(d)) return "Mobile number must start with 6, 7, 8 or 9.";
+    var counts = {};
+    for (var i = 0; i < 10; i++) {
+      counts[d[i]] = (counts[d[i]] || 0) + 1;
+      if (counts[d[i]] > 7) return "Please enter a valid mobile number (a digit repeats too many times).";
+    }
+    var asc = true, desc = true;
+    for (var j = 1; j < 10; j++) {
+      var diff = +d[j] - +d[j - 1];
+      if (diff !== 1) asc = false;
+      if (diff !== -1) desc = false;
+    }
+    if (asc || desc || d === "1234567890" || d === "0987654321") {
+      return "Please enter a valid mobile number (sequential numbers are not allowed).";
+    }
+    return "";
+  }
+
   /* ---------- Seed sample blog posts on first load ---------- */
   function seedBlogs() {
     if (localStorage.getItem(BLOG_KEY)) return;
@@ -235,8 +262,11 @@
     writeJSON(LEAD_KEY, leads);
   }
   function handleLeadForm(form) {
+    var phoneEl = form.querySelector('[name="phone"]');
+    if (phoneEl) phoneEl.addEventListener("input", function () { phoneEl.setCustomValidity(""); });
     form.addEventListener("submit", function (e) {
       e.preventDefault();
+      if (phoneEl) phoneEl.setCustomValidity(phoneError(phoneEl.value));
       if (!form.checkValidity()) { form.reportValidity(); return; }
       var fd = new FormData(form);
       var lead = {
