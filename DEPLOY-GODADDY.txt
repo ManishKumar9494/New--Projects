@@ -1,0 +1,92 @@
+============================================================
+KW New Projects — Deploying on GoDaddy (cPanel / PHP hosting)
+============================================================
+
+Your GoDaddy "Web Hosting Starter" plan is cPanel shared hosting = Apache +
+PHP + .htaccess. api.php stores blogs & leads in JSON files on the server, so
+a blog you publish in admin.html goes LIVE for every visitor on index.html.
+(localStorage alone only shows in your own browser.)
+
+Nothing in the code is GoDaddy-specific — the same files work on any cPanel
+host. Just upload and go.
+
+------------------------------------------------------------
+1) UPLOAD (cPanel File Manager)
+------------------------------------------------------------
+cPanel -> Files -> File Manager -> open the "public_html" folder.
+Upload the WHOLE project there, keeping the structure:
+
+  public_html/
+    index.html
+    admin.html
+    style.css
+    script.js
+    api.php            <-- PHP backend
+    robots.txt
+    sitemap.xml
+    data/              <-- created automatically; must be WRITABLE
+      .htaccess        (blocks public access to the JSON files)
+    images/
+      ... your images ...
+
+TIP: zip the project, upload the .zip via File Manager, then right-click ->
+"Extract" into public_html. Make sure the files sit directly in public_html
+(not inside an extra sub-folder).
+
+------------------------------------------------------------
+2) PHP VERSION
+------------------------------------------------------------
+cPanel -> "MultiPHP Manager" -> set public_html to PHP 7.4 or 8.x.
+(api.php uses standard functions available on all of these.)
+
+------------------------------------------------------------
+3) PERMISSIONS
+------------------------------------------------------------
+PHP must be able to write to the /data folder (to save blogs.json / leads.json).
+Usually works by default. If saving fails:
+  File Manager -> right-click "data" -> "Change Permissions" -> 755
+  (use 775 only if 755 doesn't work).
+
+------------------------------------------------------------
+4) ADMIN PASSWORD
+------------------------------------------------------------
+Login is verified server-side in api.php via a SHA-256 hash. The same hash is
+in two places:
+  - api.php     ->  $ADMIN_SHA256 = "..."
+  - admin.html  ->  var PW_HASH   = "..."   (offline fallback only)
+
+To change the password, compute the SHA-256 hex of the new password and paste
+the SAME value into BOTH files:
+  - Git-Bash / Mac / Linux:  printf '%s' 'YourNewPassword' | sha256sum
+  - or any "SHA-256 online" generator
+(The password itself is never stored — only its hash.)
+
+------------------------------------------------------------
+5) TEST
+------------------------------------------------------------
+  a) Visit  https://yourdomain/api.php?action=blogs
+       -> should return JSON: {"ok":true,"blogs":[...]}
+  b) Open   https://yourdomain/admin.html
+       -> top-right chip should read "Live (server)". Log in, publish a post.
+  c) Open   https://yourdomain/  in another browser/phone
+       -> the new post appears in the Blog section (live for everyone).
+  d) Submit an enquiry form on the site
+       -> it appears in admin -> "Lead Enquiries" (and CSV export).
+
+If api.php is NOT reachable, the site auto-falls back to localStorage mode
+(single browser only) and the admin chip reads "Local (this browser)".
+
+------------------------------------------------------------
+6) DOMAIN
+------------------------------------------------------------
+Point your domain to the GoDaddy hosting (Add-on/primary domain in cPanel),
+or use the temporary URL GoDaddy gives you to test first. Update the absolute
+URLs in index.html (canonical, og:url, sitemap.xml) to your real domain when
+it's final.
+
+------------------------------------------------------------
+7) OPTIONAL — Cratio CRM
+------------------------------------------------------------
+Leads also POST to Cratio if you enable it in script.js (CRM config block:
+set CRM.enabled = true, paste your web-form endpoint + field map). Leads are
+always saved on your server regardless.

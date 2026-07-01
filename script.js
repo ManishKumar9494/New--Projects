@@ -34,6 +34,21 @@
     return /^https?:\/\//i.test(url.trim());
   }
 
+  /* ---------- PHP backend helpers (graceful fallback to localStorage) ---------- */
+  var API = "api.php";
+  function apiGet(action) {
+    return fetch(API + "?action=" + encodeURIComponent(action), { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .catch(function () { return null; });
+  }
+  function apiPost(action, data) {
+    return fetch(API + "?action=" + encodeURIComponent(action), {
+      method: "POST", credentials: "same-origin",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data || {})
+    }).then(function (r) { return r.json().catch(function () { return null; }); }).catch(function () { return null; });
+  }
+
   /* ---------- Phone validation ----------
      Rules: exactly 10 digits, starts 6-9, not a sequential run,
      and no single digit repeated more than 7 times.
@@ -140,12 +155,10 @@
     return card;
   }
 
-  function renderBlog() {
+  function paintPosts(posts) {
     var grid = document.getElementById("blogGrid");
     if (!grid) return;
-    var posts = readJSON(BLOG_KEY, []).slice().sort(function (a, b) {
-      return new Date(b.date) - new Date(a.date);
-    });
+    posts = (posts || []).slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
     grid.textContent = "";
     if (!posts.length) {
       var note = document.createElement("p");
@@ -155,6 +168,13 @@
       return;
     }
     posts.slice(0, 6).forEach(function (post) { grid.appendChild(buildPostCard(post)); });
+  }
+  // Prefer the PHP backend (live for all visitors); fall back to localStorage.
+  function renderBlog() {
+    apiGet("blogs").then(function (res) {
+      if (res && res.ok && Array.isArray(res.blogs)) paintPosts(res.blogs);
+      else paintPosts(readJSON(BLOG_KEY, []));
+    });
   }
 
   /* ---------- Blog reader modal (safe DOM build) ---------- */
@@ -327,8 +347,9 @@
         source: form.getAttribute("data-source") || "Website",
         date: nowISO()
       };
-      saveLead(lead);
-      sendToCRM(lead);
+      saveLead(lead);        // localStorage backup
+      apiPost("lead", lead); // persist to PHP backend (Hostinger) — admin sees it
+      sendToCRM(lead);       // Cratio CRM (if configured)
       if (window.dataLayer) window.dataLayer.push({ event: "generate_lead", lead_source: lead.source });
       if (typeof gtag === "function") { try { gtag("event", "generate_lead", { source: lead.source }); } catch (err) {} }
 

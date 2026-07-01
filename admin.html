@@ -38,6 +38,7 @@
         <span class="brand__name">KW New Projects<small>Content Admin</small></span>
       </div>
       <div style="display:flex;gap:10px;align-items:center">
+        <span class="tag" id="modeTag" title="Storage mode" style="display:none"></span>
         <a class="btn btn--ghost btn--sm" href="index.html" target="_blank" rel="noopener" style="color:#fff;border-color:rgba(255,255,255,.25)"><i class="fa-solid fa-up-right-from-square"></i> View Site</a>
         <button class="btn btn--copper btn--sm" id="logoutBtn"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</button>
       </div>
@@ -125,14 +126,17 @@
 (function () {
   "use strict";
 
-  /* ===== Shared keys (must match script.js) ===== */
+  /* ===== Config ===== */
+  var API = "api.php";
   var BLOG_KEY = "kwnp_blogs";
   var LEAD_KEY = "kwnp_leads";
   var AUTH_KEY = "kwnp_admin_ok";
-
-  /* SHA-256 hash of the access password (password is NOT stored in plaintext).
-     To set a new password, compute its SHA-256 hex and replace the value below. */
+  /* SHA-256 hash of the access password (used only for the localStorage fallback
+     when there is no PHP backend). On Hostinger the PHP session is authoritative;
+     set the matching hash in api.php. To change the password, update BOTH. */
   var PW_HASH = "82e39aa4c1f657b4b378ed1b2067cf9fe22795d88eb660dcebad143157e7c231";
+
+  var SERVER = false; // true once api.php responds (PHP hosting like Hostinger)
 
   /* ===== helpers ===== */
   function readJSON(k, f) { try { var v = JSON.parse(localStorage.getItem(k)); return Array.isArray(v) ? v : f; } catch (e) { return f; } }
@@ -142,12 +146,10 @@
   function fmtDate(iso) { try { return new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }); } catch (e) { return iso; } }
   function isSafeUrl(u) { return typeof u === "string" && /^https?:\/\//i.test(u.trim()); }
   function slugify(s) { return String(s).toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, ""); }
-
   async function sha256Hex(str) {
     var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
     return Array.from(new Uint8Array(buf)).map(function (b) { return b.toString(16).padStart(2, "0"); }).join("");
   }
-
   var toastTimer;
   function toast(msg) {
     var t = document.getElementById("toast");
@@ -156,44 +158,94 @@
     toastTimer = setTimeout(function () { t.classList.remove("show"); }, 2600);
   }
 
-  /* ===== Auth gate ===== */
-  var gate = document.getElementById("gate");
-  var shell = document.getElementById("shell");
+  async function apiGet(a) {
+    try { var r = await fetch(API + "?action=" + a, { credentials: "same-origin" }); if (!r.ok && r.status !== 401) return null; return await r.json(); }
+    catch (e) { return null; }
+  }
+  async function apiPost(a, d) {
+    try {
+      var r = await fetch(API + "?action=" + a, { method: "POST", credentials: "same-origin", headers: { "Content-Type": "application/json" }, body: JSON.stringify(d || {}) });
+      return await r.json();
+    } catch (e) { return null; }
+  }
 
+  /* ===== Data layer — PHP backend when available, else localStorage ===== */
+  async function dataGetBlogs() {
+    if (SERVER) { var r = await apiGet("blogs"); return (r && r.ok && Array.isArray(r.blogs)) ? r.blogs : []; }
+    return readJSON(BLOG_KEY, []).slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+  }
+  async function dataSaveBlog(post) {
+    if (SERVER) { var r = await apiPost("save_blog", post); return !!(r && r.ok); }
+    var blogs = readJSON(BLOG_KEY, []);
+    var i = blogs.findIndex(function (b) { return b.id === post.id; });
+    if (i > -1) { post.date = blogs[i].date; blogs[i] = post; } else { blogs.push(post); }
+    writeJSON(BLOG_KEY, blogs); return true;
+  }
+  async function dataDeleteBlog(id) {
+    if (SERVER) { var r = await apiPost("delete_blog", { id: id }); return !!(r && r.ok); }
+    writeJSON(BLOG_KEY, readJSON(BLOG_KEY, []).filter(function (b) { return b.id !== id; })); return true;
+  }
+  async function dataGetLeads() {
+    if (SERVER) { var r = await apiGet("leads"); return (r && r.ok && Array.isArray(r.leads)) ? r.leads : []; }
+    return readJSON(LEAD_KEY, []).slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+  }
+  async function dataDeleteLead(id) {
+    if (SERVER) { var r = await apiPost("delete_lead", { id: id }); return !!(r && r.ok); }
+    writeJSON(LEAD_KEY, readJSON(LEAD_KEY, []).filter(function (l) { return l.id !== id; })); return true;
+  }
+  async function dataClearLeads() {
+    if (SERVER) { var r = await apiPost("clear_leads", {}); return !!(r && r.ok); }
+    writeJSON(LEAD_KEY, []); return true;
+  }
+
+  /* ===== Auth / boot ===== */
+  var gate, shell;
   function showShell() {
     gate.style.display = "none";
     shell.classList.add("is-on");
+    var tag = document.getElementById("modeTag");
+    tag.style.display = ""; tag.textContent = SERVER ? "Live (server)" : "Local (this browser)";
     initDashboard();
   }
 
-  if (sessionStorage.getItem(AUTH_KEY) === "1") showShell();
+  async function boot() {
+    gate = document.getElementById("gate");
+    shell = document.getElementById("shell");
+    var s = await apiGet("session");
+    if (s && s.ok) { SERVER = true; if (s.admin) showShell(); }
+    else { SERVER = false; if (sessionStorage.getItem(AUTH_KEY) === "1") showShell(); }
 
-  document.getElementById("gateForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-    var err = document.getElementById("gateErr");
-    var pw = document.getElementById("pw").value;
-    err.textContent = "";
-    try {
-      var hex = await sha256Hex(pw);
-      if (hex === PW_HASH) {
-        sessionStorage.setItem(AUTH_KEY, "1");
-        showShell();
+    document.getElementById("gateForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      var err = document.getElementById("gateErr");
+      var pw = document.getElementById("pw").value;
+      err.textContent = "";
+      if (SERVER) {
+        var r = await apiPost("login", { password: pw });
+        if (r && r.ok) { showShell(); }
+        else { err.textContent = (r && r.error) || "Incorrect password."; document.getElementById("pw").value = ""; }
       } else {
-        err.textContent = "Incorrect password. Please try again.";
-        document.getElementById("pw").value = "";
+        try {
+          var hex = await sha256Hex(pw);
+          if (hex === PW_HASH) { sessionStorage.setItem(AUTH_KEY, "1"); showShell(); }
+          else { err.textContent = "Incorrect password. Please try again."; document.getElementById("pw").value = ""; }
+        } catch (e2) { err.textContent = "Secure crypto unavailable in this browser context."; }
       }
-    } catch (e2) {
-      err.textContent = "Secure crypto unavailable in this browser context.";
-    }
-  });
+    });
 
-  document.getElementById("logoutBtn").addEventListener("click", function () {
-    sessionStorage.removeItem(AUTH_KEY);
-    location.reload();
-  });
+    document.getElementById("logoutBtn").addEventListener("click", async function () {
+      if (SERVER) { await apiPost("logout", {}); } else { sessionStorage.removeItem(AUTH_KEY); }
+      location.reload();
+    });
+  }
 
   /* ===== Dashboard ===== */
+  var inited = false;
   function initDashboard() {
+    if (inited) return; inited = true;
+
+    var blogsCache = [], leadsCache = [];
+
     /* tab switching */
     document.querySelectorAll(".admin-tab").forEach(function (tab) {
       tab.addEventListener("click", function () {
@@ -227,39 +279,32 @@
     }
     document.getElementById("blogResetBtn").addEventListener("click", resetBlogForm);
 
-    blogForm.addEventListener("submit", function (e) {
+    blogForm.addEventListener("submit", async function (e) {
       e.preventDefault();
       if (!blogForm.checkValidity()) { blogForm.reportValidity(); return; }
       var img = fImg.value.trim();
       if (img && !isSafeUrl(img) && !/^images\//.test(img)) { toast("Image URL must start with http(s):// or images/"); return; }
-      var blogs = readJSON(BLOG_KEY, []);
-      var slug = slugify(fSlug.value || fTitle.value);
       var record = {
         id: fId.value || uid(),
         title: fTitle.value.trim(),
         category: fCat.value,
         meta: fMeta.value.trim(),
         image: img,
-        slug: slug,
+        slug: slugify(fSlug.value || fTitle.value),
         body: fBody.value.trim(),
         date: nowISO()
       };
-      if (fId.value) {
-        var i = blogs.findIndex(function (b) { return b.id === fId.value; });
-        if (i > -1) { record.date = blogs[i].date; blogs[i] = record; }
-        toast("Post updated");
-      } else {
-        blogs.push(record);
-        toast("Post published — live on the site");
-      }
-      writeJSON(BLOG_KEY, blogs);
+      var editing = !!fId.value;
+      var ok = await dataSaveBlog(record);
+      if (!ok) { toast("Could not save — please try again."); return; }
+      toast(editing ? "Post updated — live on the site" : "Post published — live on the site");
       resetBlogForm();
-      renderBlogs();
+      await renderBlogs();
       renderStats();
     });
 
     function editBlog(id) {
-      var b = readJSON(BLOG_KEY, []).find(function (x) { return x.id === id; });
+      var b = blogsCache.find(function (x) { return x.id === id; });
       if (!b) return;
       fId.value = b.id; fTitle.value = b.title; fCat.value = b.category; fMeta.value = b.meta || "";
       fImg.value = b.image || ""; fSlug.value = b.slug || ""; fBody.value = b.body || "";
@@ -268,20 +313,21 @@
       document.getElementById("blogSubmitBtn").innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Post';
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
-    function deleteBlog(id) {
+    async function deleteBlog(id) {
       if (!confirm("Delete this blog post? This cannot be undone.")) return;
-      writeJSON(BLOG_KEY, readJSON(BLOG_KEY, []).filter(function (b) { return b.id !== id; }));
-      renderBlogs(); renderStats(); toast("Post deleted");
+      await dataDeleteBlog(id);
+      await renderBlogs(); renderStats(); toast("Post deleted");
     }
 
-    function renderBlogs() {
+    async function renderBlogs() {
       var body = document.getElementById("blogTableBody");
-      var blogs = readJSON(BLOG_KEY, []).slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+      var blogs = await dataGetBlogs();
+      blogsCache = blogs;
       body.textContent = "";
       document.getElementById("blogCount").textContent = blogs.length + (blogs.length === 1 ? " post" : " posts");
       if (!blogs.length) {
         var tr = document.createElement("tr");
-        var td = document.createElement("td"); td.colSpan = 4; td.style.color = "#6c7686"; td.textContent = "No posts yet. Add your first post.";
+        var td = document.createElement("td"); td.colSpan = 4; td.style.color = "#6f6c66"; td.textContent = "No posts yet. Add your first post.";
         tr.appendChild(td); body.appendChild(tr); return;
       }
       blogs.forEach(function (b) {
@@ -300,13 +346,14 @@
     }
 
     /* ---- Leads ---- */
-    function renderLeads() {
+    async function renderLeads() {
       var body = document.getElementById("leadTableBody");
-      var leads = readJSON(LEAD_KEY, []).slice().sort(function (a, b) { return new Date(b.date) - new Date(a.date); });
+      var leads = await dataGetLeads();
+      leadsCache = leads;
       body.textContent = "";
       if (!leads.length) {
         var tr = document.createElement("tr");
-        var td = document.createElement("td"); td.colSpan = 8; td.style.color = "#6c7686"; td.textContent = "No enquiries captured yet.";
+        var td = document.createElement("td"); td.colSpan = 8; td.style.color = "#6f6c66"; td.textContent = "No enquiries captured yet.";
         tr.appendChild(td); body.appendChild(tr); return;
       }
       leads.forEach(function (l) {
@@ -316,10 +363,10 @@
         });
         var tdAct = document.createElement("td");
         var del = document.createElement("button"); del.className = "icon-btn danger"; del.title = "Delete"; del.innerHTML = '<i class="fa-solid fa-trash"></i>';
-        del.addEventListener("click", function () {
+        del.addEventListener("click", async function () {
           if (!confirm("Delete this lead?")) return;
-          writeJSON(LEAD_KEY, readJSON(LEAD_KEY, []).filter(function (x) { return x.id !== l.id; }));
-          renderLeads(); renderStats(); toast("Lead deleted");
+          await dataDeleteLead(l.id);
+          await renderLeads(); renderStats(); toast("Lead deleted");
         });
         tdAct.appendChild(del); tr.appendChild(tdAct);
         body.appendChild(tr);
@@ -327,8 +374,8 @@
     }
 
     function csvCell(v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }
-    document.getElementById("exportBtn").addEventListener("click", function () {
-      var leads = readJSON(LEAD_KEY, []);
+    document.getElementById("exportBtn").addEventListener("click", async function () {
+      var leads = await dataGetLeads();
       if (!leads.length) { toast("No leads to export"); return; }
       var headers = ["Name", "Phone", "Email", "Configuration", "Visit Date", "Source", "Date"];
       var rows = leads.map(function (l) { return [l.name, l.phone, l.email, l.config, l.visitDate, l.source, fmtDate(l.date)].map(csvCell).join(","); });
@@ -341,32 +388,33 @@
       toast("CSV exported");
     });
 
-    document.getElementById("clearLeadsBtn").addEventListener("click", function () {
+    document.getElementById("clearLeadsBtn").addEventListener("click", async function () {
       if (!confirm("Clear ALL leads? This cannot be undone.")) return;
-      writeJSON(LEAD_KEY, []); renderLeads(); renderStats(); toast("All leads cleared");
+      await dataClearLeads();
+      await renderLeads(); renderStats(); toast("All leads cleared");
     });
 
-    /* ---- Stats ---- */
+    /* ---- Stats (from caches populated by the renders) ---- */
     function renderStats() {
-      var blogs = readJSON(BLOG_KEY, []);
-      var leads = readJSON(LEAD_KEY, []);
-      document.getElementById("statBlogs").textContent = blogs.length;
-      document.getElementById("statLeads").textContent = leads.length;
-      document.getElementById("statVisits").textContent = leads.filter(function (l) { return l.visitDate && l.visitDate !== "—"; }).length;
+      document.getElementById("statBlogs").textContent = blogsCache.length;
+      document.getElementById("statLeads").textContent = leadsCache.length;
+      document.getElementById("statVisits").textContent = leadsCache.filter(function (l) { return l.visitDate && l.visitDate !== "—"; }).length;
       var today = new Date().toDateString();
-      document.getElementById("statToday").textContent = leads.filter(function (l) { try { return new Date(l.date).toDateString() === today; } catch (e) { return false; } }).length;
+      document.getElementById("statToday").textContent = leadsCache.filter(function (l) { try { return new Date(l.date).toDateString() === today; } catch (e) { return false; } }).length;
     }
 
-    /* live sync from public tab */
+    /* live sync from the public tab (localStorage fallback mode) */
     window.addEventListener("storage", function (e) {
-      if (e.key === LEAD_KEY) { renderLeads(); renderStats(); }
-      if (e.key === BLOG_KEY) { renderBlogs(); renderStats(); }
+      if (!SERVER && (e.key === LEAD_KEY || e.key === BLOG_KEY)) {
+        renderBlogs().then(function () { return renderLeads(); }).then(renderStats);
+      }
     });
 
-    renderBlogs();
-    renderLeads();
-    renderStats();
+    /* initial load */
+    renderBlogs().then(function () { return renderLeads(); }).then(renderStats);
   }
+
+  boot();
 })();
 </script>
 </body>

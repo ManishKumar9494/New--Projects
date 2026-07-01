@@ -2,5 +2,7 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /api.php
+Disallow: /data/
 
 Sitemap: https://www.kwnewprojects.com/sitemap.xml
