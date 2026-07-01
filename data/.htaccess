@@ -1,5 +1,6 @@
 # Block direct web access to the JSON data files (blogs.json, leads.json).
 # The site reads/writes them only through api.php.
+Options -Indexes
 <IfModule mod_authz_core.c>
     Require all denied
 </IfModule>

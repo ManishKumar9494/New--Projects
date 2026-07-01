@@ -18,10 +18,30 @@
 
 declare(strict_types=1);
 
+/* Never leak PHP errors/paths to the client (they still go to the server log). */
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+
 header('Content-Type: application/json; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Referrer-Policy: strict-origin-when-cross-origin');
 header('Cache-Control: no-store');
 
+/* Harden the session cookie (GoDaddy serves over HTTPS). SameSite=Lax blocks
+   cross-site forged POSTs to the admin endpoints (CSRF mitigation). */
+$__secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    || (($_SERVER['SERVER_PORT'] ?? '') === '443')
+    || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+if (PHP_VERSION_ID >= 70300) {
+    session_set_cookie_params([
+        'lifetime' => 0, 'path' => '/', 'httponly' => true,
+        'secure' => $__secure, 'samesite' => 'Lax',
+    ]);
+} else {
+    session_set_cookie_params(0, '/; samesite=Lax', '', $__secure, true);
+}
+session_name('KWNPADMIN');
 session_start();
 
 $DATA_DIR   = __DIR__ . '/data';
@@ -134,7 +154,8 @@ switch ($action) {
 
     case 'login': {
         $pw = clean_str(input()['password'] ?? '', 200);
-        if (hash('sha256', $pw) === $ADMIN_SHA256) {
+        // constant-time compare to avoid timing attacks
+        if ($pw !== '' && hash_equals($ADMIN_SHA256, hash('sha256', $pw))) {
             session_regenerate_id(true);
             $_SESSION['kwnp_admin'] = true;
             jexit(['ok' => true]);
@@ -142,6 +163,14 @@ switch ($action) {
         usleep(400000); // slow down brute force
         jexit(['ok' => false, 'error' => 'Incorrect password'], 401);
     }
+
+    case 'health':
+        jexit([
+            'ok' => true,
+            'php' => PHP_VERSION,
+            'data_writable' => is_dir($DATA_DIR) && is_writable($DATA_DIR),
+            'admin' => is_admin(),
+        ]);
 
     case 'logout':
         $_SESSION = [];
