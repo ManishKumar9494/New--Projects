@@ -1,0 +1,5 @@
+# Force Unix (LF) line endings for server-side files so Apache/PHP on GoDaddy
+# never receive Windows CRLF endings.
+*.php       text eol=lf
+.htaccess   text eol=lf
+*.sh        text eol=lf
